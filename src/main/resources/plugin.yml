@@ -1,0 +1,18 @@
+name: SecondWind
+version: 1.0.0
+main: com.secondwind.SecondWindPlugin
+api-version: '1.21'
+description: Downed-but-not-out revive system — crawl, bleed out, get revived or executed.
+author: SecondWind
+commands:
+  secondwind:
+    description: SecondWind admin commands
+    aliases: [sw]
+    usage: /secondwind <reload|status|down|revive|execute> [player]
+permissions:
+  secondwind.admin:
+    description: Admin access to SecondWind commands
+    default: op
+  secondwind.bypass:
+    description: Never enters the downed state
+    default: op

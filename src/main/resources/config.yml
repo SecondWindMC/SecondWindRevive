@@ -1,0 +1,53 @@
+# SecondWind — downed-but-not-out revive system
+settings:
+  # Health a downed player is left at (hearts x2, so 4.0 = 2 hearts)
+  downed-health: 4.0
+  # Health restored on revive
+  revived-health: 6.0
+  # Seconds before a downed player bleeds out and dies for real
+  bleed-out-seconds: 60
+  # Seconds a teammate must channel (sneak, in range) to revive
+  revive-seconds: 8
+  # Seconds an enemy must channel to execute
+  execute-seconds: 10
+  # Max distance to revive/execute (blocks)
+  interact-radius: 3.0
+  # Crawl speed while downed: fraction of normal speed (0 = fully immobile)
+  movement-multiplier: 0.15
+  # Invulnerability seconds after being revived
+  post-revive-invulnerable-seconds: 5
+  # Who can see the bleed-out boss bar (blocks)
+  bossbar-visible-radius: 16
+  # Who can revive: ANYONE or TEAM (same scoreboard team)
+  revivers: ANYONE
+  # Who can execute: ENEMY (anyone not on the victim's team), ANYONE, or NONE
+  executors: ENEMY
+  # Taking damage cancels an in-progress revive/execute channel
+  channel-interrupt-on-damage: true
+  # Let downed players crawl slowly; false = fully immobile
+  allow-crawl: true
+  # Logging out while downed counts as death
+  kill-on-logout: true
+  # Broadcast "<player> is down!" to the server
+  broadcast-on-down: true
+  # Damage causes that kill outright instead of downing
+  exempt-causes:
+    - VOID
+    - SUICIDE
+    - WORLD_BORDER
+    - CUSTOM
+    - GENERIC_KILL
+    - KILL
+  # Worlds where DBNO is disabled (normal deaths)
+  disabled-worlds: []
+  # Commands a downed player cannot run (base name, no slash)
+  blocked-commands:
+    - spawn
+    - home
+    - tpa
+    - tpaccept
+    - tpahere
+    - warp
+    - back
+  # Verbose console logging (useful for testing)
+  debug: false

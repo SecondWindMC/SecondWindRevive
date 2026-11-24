@@ -1,0 +1,27 @@
+# SecondWind messages — legacy & color codes, {placeholders} available per message
+prefix: "&8[&cSecondWind&8] &r"
+
+bossbar-downed: "&c&lDOWNED — bleeding out"
+
+downed-self: "{prefix}&cYou are down! A teammate can revive you by holding &lSNEAK &cnearby."
+downed-broadcast: "{prefix}&c{player} is down! Hold &lSNEAK &cnear them to revive."
+revived-self: "{prefix}&aYou were revived. Second wind!"
+revived-other: "{prefix}&aYou revived &l{player}&a."
+executed-self: "{prefix}&cYou were finished off."
+channel-interrupted: "{prefix}&cChannel interrupted."
+teleport-blocked: "{prefix}&cYou cannot teleport while downed."
+command-blocked: "{prefix}&cYou cannot use that command while downed."
+
+actionbar-reviving: "&aReviving {player} — {progress}%"
+actionbar-being-revived: "&a{player} is reviving you — {progress}%"
+actionbar-executing: "&cExecuting {player} — {progress}%"
+actionbar-being-executed: "&c{player} is executing you — {progress}%"
+
+help: "{prefix}&7Commands: /sw reload &8| &7/sw status [player] &8| &7/sw down <player> &8| &7/sw revive <player> &8| &7/sw execute <player>"
+reload-ok: "{prefix}&aConfiguration reloaded."
+no-permission: "{prefix}&cYou do not have permission."
+player-not-found: "{prefix}&cPlayer not found or not online."
+usage-target: "{prefix}&cUsage: /sw <down|revive|execute> <player>"
+status-result: "{prefix}&7{player}: &f{state}"
+already-downed: "{prefix}&c{player} is already downed."
+not-downed: "{prefix}&c{player} is not downed."
