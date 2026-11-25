@@ -2,6 +2,10 @@
 
 Downed-but-not-out (DBNO) revive system for Paper servers. Lethal damage puts players into a crawl + bleed-out state; teammates revive them, enemies finish them.
 
+**Download:** see [Releases](../../releases) — or on [Hangar](https://hangar.papermc.io/SecondWindMC/SecondWindRevive).
+**Bundle / support:** https://secondwindmc.github.io — $5.99 standalone or $8.99 with GraveGuard.
+**Support:** secondwindmc@proton.me
+
 ## Install
 1. Drop `SecondWind-1.0.0.jar` into `plugins/`
 2. Restart (or `/reload` not needed — just start the server)
@@ -32,6 +36,15 @@ Permission `secondwind.bypass` — never goes downed (default: op).
 `bleed-out-seconds`, `revive-seconds`, `execute-seconds`, `interact-radius`, `movement-multiplier`, `revived-health`, `post-revive-invulnerable-seconds`, `revivers: ANYONE|TEAM`, `executors: ENEMY|ANYONE|NONE`, `exempt-causes`, `disabled-worlds`, `blocked-commands`.
 
 All player-facing text lives in `messages.yml` (legacy `&` colors, `{placeholders}`).
+
+## Validation performed
+
+Validated on Paper 1.21.11 build 132 with Java 21 using automated offline-mode Mineflayer clients:
+
+- lethal player damage put the victim into the downed state at 4 health instead of causing immediate death;
+- the victim remained in place instead of respawning;
+- a nearby sneaking teammate completed the revive channel;
+- revived health matched the configured value of 6.
 
 ## Build from source
 ```
