@@ -23,6 +23,7 @@ import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
@@ -75,6 +76,11 @@ public final class DownedListener implements Listener {
         if (mgr.isDowned(p.getUniqueId()) && plugin.sw().killOnLogout) {
             mgr.killDowned(p);
         }
+    }
+
+    @EventHandler
+    public void onJoin(PlayerJoinEvent e) {
+        mgr.restoreIfNeeded(e.getPlayer());
     }
 
     // ---- restrictions while downed ----

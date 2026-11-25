@@ -15,8 +15,11 @@ import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Pose;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.scoreboard.Team;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -27,6 +30,7 @@ public final class DownedManager {
 
     private final SecondWindPlugin plugin;
     private final Map<UUID, DownedState> downed = new HashMap<>();
+    private final Map<UUID, Double> pendingRestore = new HashMap<>();
     private final Map<UUID, Long> protectedUntil = new HashMap<>();
     private final Set<UUID> bypass = new HashSet<>();
     private NamespacedKey slowKey;
@@ -34,6 +38,8 @@ public final class DownedManager {
     public DownedManager(SecondWindPlugin plugin) {
         this.plugin = plugin;
         this.slowKey = new NamespacedKey(plugin, "downed_slow");
+        loadPersisted();
+        for (Player p : Bukkit.getOnlinePlayers()) restoreIfNeeded(p);
     }
 
     public boolean isDowned(UUID id) {
@@ -57,6 +63,63 @@ public final class DownedManager {
         return downed;
     }
 
+    public boolean hasPersistableStates() {
+        return !downed.isEmpty() || !pendingRestore.isEmpty();
+    }
+
+    private File stateFile() {
+        return new File(plugin.getDataFolder(), "downed.yml");
+    }
+
+    private void loadPersisted() {
+        File file = stateFile();
+        if (!file.exists()) return;
+        YamlConfiguration yml = YamlConfiguration.loadConfiguration(file);
+        var section = yml.getConfigurationSection("players");
+        if (section == null) return;
+        for (String key : section.getKeys(false)) {
+            try {
+                pendingRestore.put(UUID.fromString(key), section.getDouble(key + ".remaining", 0.0));
+            } catch (IllegalArgumentException ignored) {
+                plugin.getLogger().warning("Ignoring invalid downed-state UUID " + key);
+            }
+        }
+    }
+
+    public void savePersisted() {
+        YamlConfiguration yml = new YamlConfiguration();
+        for (Map.Entry<UUID, Double> entry : pendingRestore.entrySet()) {
+            yml.set("players." + entry.getKey() + ".remaining", entry.getValue());
+        }
+        for (DownedState st : downed.values()) {
+            yml.set("players." + st.playerId + ".remaining", Math.max(0.1, st.bleedOutRemaining));
+        }
+        try {
+            yml.save(stateFile());
+        } catch (IOException e) {
+            plugin.getLogger().warning("Could not save downed state: " + e.getMessage());
+        }
+    }
+
+    public void restoreIfNeeded(Player p) {
+        Double remaining = pendingRestore.remove(p.getUniqueId());
+        if (remaining == null || isDowned(p.getUniqueId())) return;
+        Settings cfg = plugin.sw();
+        if (cfg.disabledWorlds.contains(p.getWorld().getName())) return;
+
+        p.setHealth(Math.min(cfg.downedHealth, p.getMaxHealth()));
+        DownedState state = new DownedState(p, Math.max(0.1, remaining), Msg.raw("bossbar-downed"));
+        state.bossBar.setProgress(Math.max(0.0, Math.min(1.0, remaining / cfg.bleedOutSeconds)));
+        downed.put(p.getUniqueId(), state);
+        applySlow(p);
+        p.setPose(Pose.SWIMMING);
+        p.setSneaking(false);
+        p.setGliding(false);
+        Msg.send(p, "downed-self");
+        savePersisted();
+        debug(p.getName() + " restored downed state with " + String.format("%.1f", remaining) + "s remaining");
+    }
+
     /** Put a player into the downed state. Caller must have cancelled the lethal damage. */
     public void enterDowned(Player p, String causeLabel) {
         Settings cfg = plugin.sw();
@@ -77,6 +140,7 @@ public final class DownedManager {
                 if (!other.equals(p)) Msg.send(other, "downed-broadcast", "player", p.getName());
             });
         }
+        savePersisted();
         debug(p.getName() + " is downed (cause: " + causeLabel + ")");
     }
 
@@ -98,6 +162,7 @@ public final class DownedManager {
 
         Msg.send(p, "revived-self");
         if (reviver instanceof Player r) Msg.send(r, "revived-other", "player", p.getName());
+        savePersisted();
         debug(p.getName() + " was revived by " + (reviver == null ? "console" : reviver.getName()));
     }
 
@@ -130,6 +195,7 @@ public final class DownedManager {
         } finally {
             bypass.remove(p.getUniqueId());
         }
+        savePersisted();
     }
 
     /** Immediately drop the downed state without reviving (logout, disable). Kills the player. */
@@ -138,16 +204,18 @@ public final class DownedManager {
     }
 
     public void shutdown() {
+        savePersisted();
         for (UUID id : new HashSet<>(downed.keySet())) {
             Player p = Bukkit.getPlayer(id);
             DownedState st = downed.remove(id);
+            pendingRestore.put(id, st == null ? 0.1 : Math.max(0.1, st.bleedOutRemaining));
             if (st != null) st.dispose();
             if (p != null) {
                 removeSlow(p);
                 p.setPose(Pose.STANDING);
-                p.setHealth(0);
             }
         }
+        savePersisted();
     }
 
     // ---- channel eligibility ----

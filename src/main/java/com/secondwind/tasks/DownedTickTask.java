@@ -17,6 +17,7 @@ public final class DownedTickTask extends BukkitRunnable {
 
     private final SecondWindPlugin plugin;
     private final DownedManager mgr;
+    private int runs;
 
     public DownedTickTask(SecondWindPlugin plugin) {
         this.plugin = plugin;
@@ -25,6 +26,7 @@ public final class DownedTickTask extends BukkitRunnable {
 
     @Override
     public void run() {
+        if (++runs % 50 == 0 && mgr.hasPersistableStates()) mgr.savePersisted();
         for (DownedState st : mgr.downedMap().values().toArray(DownedState[]::new)) {
             Player target = Bukkit.getPlayer(st.playerId);
             if (target == null || !target.isOnline()) continue;
